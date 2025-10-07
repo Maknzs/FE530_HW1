@@ -1,0 +1,13 @@
+project:
+  type: default
+  output-dir: _output
+
+format:
+  pdf:
+    pdf-engine: tectonic
+    number-sections: true
+    toc: true
+    fontsize: 11pt
+    geometry:
+      - margin=1in
+    linestretch: 1.5
