@@ -1,0 +1,4 @@
+F,fair,mispricing,direction
+104,104.0,0.0,"short forward (if positive, overpriced) / long forward (if negative, underpriced)"
+105,104.0,1.0,"short forward (if positive, overpriced) / long forward (if negative, underpriced)"
+103,104.0,-1.0,"short forward (if positive, overpriced) / long forward (if negative, underpriced)"

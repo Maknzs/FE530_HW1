@@ -13,3 +13,6 @@ figures/*
 *.lot
 *.bbl
 *.blg
+
+/.quarto/
+**/*.quarto_ipynb

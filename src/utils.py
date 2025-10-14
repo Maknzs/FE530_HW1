@@ -2,8 +2,19 @@ import numpy as np
 import pandas as pd
 
 def to_monthly(df):
-    # Assumes df has DatetimeIndex and 'Adj Close' column
-    m = df['Adj Close'].resample('M').last().to_frame('adj_close')
+    # Works whether df['Adj Close'] is a Series or a single-column DataFrame
+    s = df['Adj Close']
+    if isinstance(s, pd.DataFrame):
+        # squeeze to a Series if it’s a single column; else pick the first column explicitly
+        if s.shape[1] == 1:
+            s = s.squeeze("columns")
+        else:
+            # if MultiIndex (e.g., ('Adj Close','SPY')), select the first column
+            s = s.iloc[:, 0]
+
+    # Use ME (month-end) per pandas deprecation notice
+    m = s.resample('ME').last().to_frame(name='adj_close')
+    # Ensure month-end timestamps
     m.index = m.index.to_period('M').to_timestamp('M')
     return m
 

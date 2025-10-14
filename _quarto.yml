@@ -4,7 +4,7 @@ project:
 
 format:
   pdf:
-    pdf-engine: tectonic
+    pdf-engine: xelatex
     number-sections: true
     toc: true
     fontsize: 11pt
