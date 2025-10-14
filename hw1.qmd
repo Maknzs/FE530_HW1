@@ -223,7 +223,7 @@ $$
 $$
 And the value of the call option at $t=0$ is defined as
 $$
-C_0=\frac{\pi^* C_u + (1-\pi^*)C_d}{1+r_f}
+C_t=\frac{\pi^* C_u + (1-\pi^*)C_d}{1+r_f}
 $$
 
 ```{python}
@@ -381,26 +381,142 @@ As expected, higher $r$ reduces the required contribution rate, while higher $g$
 from IPython.display import Image, display
 from pathlib import Path
 display(Image(filename=str(Path("figures")/"q2_sensitivity_heatmap.png")))
-
 ```
 
 # Portfolio Management
 
-Show GMV & tangency portfolios and efficient frontier plot.
+## Define Mean Vector ($\mu$)
 
-##
+$$
+R_i=\begin{cases}
+u_i & \text{with prob }\pi_i,\\
+d_i & \text{with prob }1-\pi_i.
+\end{cases}
+$$
+Starting with the mean return for asset $i$, $\mu_i=p_iu_i+(1-p_i)d_i$, for $i\in\{1,2\}$
+$$
+\mu
+=\begin{bmatrix}\mu_1\\ \mu_2\end{bmatrix}
+=\begin{bmatrix}
+\pi_1 u_1 + (1-\pi_1) d_1\\
+\pi_2 u_2 + (1-\pi_2) d_2
+\end{bmatrix}.
+$$
 
-##
+## Define Covariance Matrix ($\Sigma$)
 
-##
+$$
+\mu=\mathbb{E}[R_i]=\pi_i u_i+(1-\pi_i)d_i,
+\qquad
+\mathbb{E}[R_i^2]=\pi_i u_i^2+(1-\pi_i)d_i^2.
+$$
+$$
+\sigma_i^2=\operatorname{Var}(R_i)=\mathbb{E}[R_i^2]-\big(\mu\big)^2
+= \pi_i u_i^2+(1-\pi_i)d_i^2
+   -\big(\pi_i u_i+(1-\pi_i)d_i\big)^2.
+$$
+$$
+\sigma_i^2=\operatorname{Var}(R_i)
+= \pi_i(1-\pi_i)\,\big(u_i^2+d_i^2-2u_i d_i\big)
+= \boxed{\,\pi_i(1-\pi_i)\,(u_i-d_i)^2\,}.
+$$
+$$
+\sigma_i = \sqrt{\pi_i(1-\pi_i)}\,\lvert u_1-d_1\rvert;
+$$
+$$
+\sigma_{12}=\operatorname{Cov}(R_{12})=\rho\,\sigma_1\,\sigma_2
+$$
+$$
+\Sigma=\begin{bmatrix}
+\operatorname{Var}(R_1) & \operatorname{Cov}(R_{1,2})\\
+\operatorname{Cov}(R_{1,2}) & \operatorname{Var}(R_2)
+\end{bmatrix},
+$$
+$$
+\Sigma=\begin{bmatrix}
+\sigma_1^2 & \rho\,\sigma_1\sigma_2\\
+\rho\,\sigma_1\sigma_2 & \sigma_2^2
+\end{bmatrix},
+$$
+$$
+\Sigma=\begin{bmatrix}
+\pi_1(1-\pi_1)(u_1-d_1)^2 & \rho\,\sqrt{\pi_1(1-\pi_1)}\,\sqrt{\pi_2(1-\pi_2)}\,\lvert u_1-d_1\rvert\lvert u_2-d_2\rvert\\[6pt]
+\rho\,\sqrt{\pi_1(1-\pi_1)}\,\sqrt{\pi_2(1-\pi_2)}\,\lvert u_1-d_1\rvert\lvert u_2-d_2\rvert & \pi_2(1-\pi_2)(u_2-d_2)^2
+\end{bmatrix}.
+$$
+```{python}
+#| label: tbl-q3-params
+#| tbl-cap: 'Effective inputs used in Q3.'
+#| echo: false
 
-##
+import pandas as pd, pathlib
+pd.read_csv(pathlib.Path("data")/"q3_params_effective.csv").round(6)
+```
 
-##
+## Global minimum-variance (GMV) and Sharpe portfolios
 
-###
 
-###
+### GMV 
+For two assets, the closed form weights are
+$$
+w_{\text{GMV},1}=\frac{\sigma_2^2-\rho\,\sigma_1\sigma_2}{\sigma_1^2+\sigma_2^2-2\rho\,\sigma_1\sigma_2},
+\qquad
+w_{\text{GMV},2}=1-w_{\text{GMV},1}.
+$$
+
+```{python}
+#| label: tbl-q3-weights
+#| tbl-cap: 'Weights on different $\rho$ values'
+#| echo: false
+
+import pandas as pd, pathlib
+pd.read_csv(pathlib.Path("data")/"q3_weights.csv").round(6)
+```
+### Sharpe: 
+The sharpe ratio is defined as
+
+With risk-free rate $r_f$, the tangency portfolio maximizes
+$$
+\mathrm{SR}(w)=\frac{w^\top\mu-r_f}{\sqrt{w^\top\Sigma w}}
+\quad\text{subject to}\quad \mathbf{1}^\top w=1.
+$$
+A standard result gives
+$$
+\boxed{\,w_{\text{SR}}=\dfrac{\Sigma^{-1}(\mu-r_f\,\mathbf{1})}{\mathbf{1}^\top\Sigma^{-1}(\mu-r_f\,\mathbf{1})}\, }.
+$$
+Its characteristics are
+$$
+\mu_{\text{SR}}=w_{\text{SR}}^\top\mu,\qquad
+\sigma_{\text{SR}}=\sqrt{\,w_{\text{SR}}^\top\Sigma\,w_{\text{SR}}\,},\qquad
+\mathrm{SR}=\frac{\mu_{\text{SR}}-r_f}{\sigma_{\text{SR}}}.
+$$
+
+Parametrize with $w_1\in\mathbb{R}$ and $w_2=1-w_1$:
+$$
+\mathbb{E}[R_p]=w_1\mu_1+(1-w_1)\mu_2,
+$$
+$$
+\operatorname{Var}(R_p)=w_1^2\sigma_1^2+(1-w_1)^2\sigma_2^2+2w_1(1-w_1)\rho\,\sigma_1\sigma_2,
+\qquad
+\sigma_p=\sqrt{\operatorname{Var}(R_p)}.
+$$
+
+```{python}
+#| label: tbl-q3-portfolios
+#| tbl-cap: '[change name]'
+#| echo: false
+
+import pandas as pd, pathlib
+pd.read_csv(pathlib.Path("data")/"q3_portfolios.csv").round(4)
+```
+
+## Diversification
+
+## $\rho=0.5$
+
+### Mean-variance efficient frontier
+
+### Compare arbitrary weights for $w_1$ and $w_2$ to the previous frontier
 
 # Forward Contracts
 
