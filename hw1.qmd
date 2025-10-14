@@ -465,16 +465,16 @@ w_{\text{GMV},2}=1-w_{\text{GMV},1}.
 $$
 
 ```{python}
-#| label: tbl-q3-weights
-#| tbl-cap: 'Weights on different $\rho$ values'
+#| label: tbl-q3-portfolios-1
+#| tbl-cap: 'GMV Portfolio Weights at $\rho={0.5,0}$'
 #| echo: false
 
 import pandas as pd, pathlib
-pd.read_csv(pathlib.Path("data")/"q3_weights.csv").round(6)
+df = pd.read_csv(pathlib.Path("data")/"q3_portfolios.csv").round(6)
+df[["rho","w1_GMV","w2_GMV"]]
 ```
-### Sharpe: 
-The sharpe ratio is defined as
 
+### Sharpe: 
 With risk-free rate $r_f$, the tangency portfolio maximizes
 $$
 \mathrm{SR}(w)=\frac{w^\top\mu-r_f}{\sqrt{w^\top\Sigma w}}
@@ -484,39 +484,55 @@ A standard result gives
 $$
 \boxed{\,w_{\text{SR}}=\dfrac{\Sigma^{-1}(\mu-r_f\,\mathbf{1})}{\mathbf{1}^\top\Sigma^{-1}(\mu-r_f\,\mathbf{1})}\, }.
 $$
-Its characteristics are
-$$
-\mu_{\text{SR}}=w_{\text{SR}}^\top\mu,\qquad
-\sigma_{\text{SR}}=\sqrt{\,w_{\text{SR}}^\top\Sigma\,w_{\text{SR}}\,},\qquad
-\mathrm{SR}=\frac{\mu_{\text{SR}}-r_f}{\sigma_{\text{SR}}}.
-$$
-
-Parametrize with $w_1\in\mathbb{R}$ and $w_2=1-w_1$:
-$$
-\mathbb{E}[R_p]=w_1\mu_1+(1-w_1)\mu_2,
-$$
-$$
-\operatorname{Var}(R_p)=w_1^2\sigma_1^2+(1-w_1)^2\sigma_2^2+2w_1(1-w_1)\rho\,\sigma_1\sigma_2,
-\qquad
-\sigma_p=\sqrt{\operatorname{Var}(R_p)}.
-$$
-
 ```{python}
-#| label: tbl-q3-portfolios
-#| tbl-cap: '[change name]'
+#| label: tbl-q3-portfolios-2
+#| tbl-cap: 'Sharpe Portfolio Weights at $\rho={0.5,0}$'
 #| echo: false
 
 import pandas as pd, pathlib
-pd.read_csv(pathlib.Path("data")/"q3_portfolios.csv").round(4)
+df = pd.read_csv(pathlib.Path("data")/"q3_portfolios.csv").round(6)
+df[["rho","w1_SR","w2_SR"]]
 ```
 
 ## Diversification
+Given on the above results, how do you justify the changes in the portfolio weights relative
+to changes in the correlation coefficient? Recall the wisdom of diversification.
 
 ## $\rho=0.5$
 
 ### Mean-variance efficient frontier
+```{python}
+#| label: fig-q3-frontier-05
+#| fig-cap: 'Two-asset efficient frontier (rho = 0.5); GMV (o) and Tangency (*).'
+#| fig-pos: 'H'
+#| echo: false
+
+from IPython.display import Image, display
+from pathlib import Path
+display(Image(filename=str(Path("figures")/"q3_frontier_rho_0p5.png")))
+```
 
 ### Compare arbitrary weights for $w_1$ and $w_2$ to the previous frontier
+```{python}
+#| label: fig-q3-frontier-05-points
+#| fig-cap: 'Frontier with arbitrary weights overlaid (rho = 0.5).'
+#| fig-pos: 'H'
+#| echo: false
+
+from IPython.display import Image, display
+from pathlib import Path
+display(Image(filename=str(Path("figures")/"q3_frontier_with_points_rho_0p5.png")))
+```
+
+```{python}
+#| label: tbl-q3-arb-05
+#| tbl-cap: 'Selected weights and their mean/sigma (rho = 0.5).'
+#| echo: false
+
+import pandas as pd, pathlib
+df=pd.read_csv(pathlib.Path("data")/"q3_arbitrary_weights_rho_0p5.csv").round(6)
+df[["w1","w2","mean","sigma"]]
+```
 
 # Forward Contracts
 

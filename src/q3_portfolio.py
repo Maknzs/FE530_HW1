@@ -108,10 +108,10 @@ for rho in rhos:
 
     rows.append({
         "rho": rho,
-        "wGMV_1": w_gmv[0], "wGMV_2": w_gmv[1],
-        "mu_GMV": mu_gmv,   "sigma_GMV": sig_gmv,
-        "wSR_1": w_sr[0],   "wSR_2": w_sr[1],
-        "mu_SR": mu_sr,     "sigma_SR": sig_sr, "sharpe_SR": sharpe_sr
+        "w1_GMV": w_gmv[0], "w2_GMV": w_gmv[1],
+        "mu_GMV": mu_gmv,   "s_GMV": sig_gmv,
+        "w1_SR": w_sr[0],   "w2_SR": w_sr[1],
+        "mu_SR": mu_sr,     "s_SR": sig_sr, "sharpe_ratio": sharpe_sr
     })
 
     # frontier plot
@@ -129,6 +129,49 @@ for rho in rhos:
     outpng = FIGS / f"q3_frontier_rho_{str(rho).replace('.','p')}.png"
     fig.savefig(outpng, dpi=160, bbox_inches="tight")
     plt.close(fig)
+
+    w1_choices = np.array([-0.50, -0.25, 0.00, 0.25, 0.50, 0.75, 1.00, 1.25])
+    w2_choices = 1.0 - w1_choices
+
+    means_sel = w1_choices * mu[0] + w2_choices * mu[1]
+    vars_sel  = (w1_choices**2) * Sigma[0, 0] \
+                + (w2_choices**2) * Sigma[1, 1] \
+                + 2.0 * w1_choices * w2_choices * Sigma[0, 1]
+    sig_sel   = np.sqrt(np.maximum(vars_sel, 0.0))
+
+    # mark "efficient" as those on the upper branch (mean ≥ mean at GMV)
+    efficient_sel = means_sel >= mu_gmv
+
+    # save a tidy table per rho and also append to a combined list
+    sel_df = pd.DataFrame({
+        "rho": rho,
+        "w1": w1_choices,
+        "w2": w2_choices,
+        "mean": means_sel,
+        "sigma": sig_sel,
+        "efficient_upper_branch": efficient_sel
+    }).round(6)
+    sel_df.to_csv(DATA / f"q3_arbitrary_weights_rho_{str(rho).replace('.','p')}.csv", index=False)
+
+    # overlay chosen points on a *new* figure (keep the original frontier figure unchanged)
+    fig2, ax2 = plt.subplots()
+    ax2.plot(sigmas, means, lw=2, label="portfolio set")
+    ax2.scatter([sig_gmv], [mu_gmv], marker="o", label="GMV")
+    ax2.scatter([sig_sr],  [mu_sr],  marker="*", label="Tangency")
+
+    # plot chosen points: filled for efficient, open for inefficient
+    ax2.scatter(sig_sel[efficient_sel],  means_sel[efficient_sel],  marker="x", label="chosen w1 (efficient)")
+    ax2.scatter(sig_sel[~efficient_sel], means_sel[~efficient_sel], facecolors="none", edgecolors="black", label="chosen w1 (not efficient)")
+    ax2.set_xlabel("Portfolio sigma (std dev)")
+    ax2.set_ylabel("Portfolio mean return")
+    ax2.set_title(f"Two-asset frontier with arbitrary weights (rho={rho:.1f})")
+    ax2.grid(True, alpha=0.3)
+    ax2.legend(loc="best", fontsize=8)
+    fig2.tight_layout()
+    outpng2 = FIGS / f"q3_frontier_with_points_rho_{str(rho).replace('.','p')}.png"
+    fig2.savefig(outpng2, dpi=160, bbox_inches="tight")
+    plt.close(fig2)
+    print("Saved:", outpng2)
 
 # save summary table
 pd.DataFrame(rows).round(6).to_csv(DATA / "q3_portfolios.csv", index=False)
