@@ -1,0 +1,4 @@
+F,F_fair,mispricing,strategy
+104.0,104.0,0.0,fair (no arbitrage)
+105.0,104.0,1.0,short forward (overpriced); cash-and-carry
+103.0,104.0,-1.0,long forward (underpriced); reverse cash-and-carry
